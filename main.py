@@ -1,6 +1,8 @@
 import csv
 import numpy as np
 import matplotlib.pyplot as plt
+
+
 plt.rcParams['figure.figsize'] = (14.0, 9.0)
 
 
@@ -13,37 +15,53 @@ class model_trainer:
 				self.data += [row]
 		for i in range(len(self.data)):
 			if i != 0:
-				self.data[i] = [float(self.data[i][0]) / 1000, float(self.data[i][1]) / 1000]
+				self.data[i] = [float(self.data[i][0]), float(self.data[i][1])]
 		
 		self.mileages = [item[0] for item in self.data[1:]]
 		self.prices = [item[1] for item in self.data[1:]]
 
+		print(self.mileages)
+		print(self.prices)
+
 		self.len = len(self.data[1:])
 		self.m = 0
 		self.c = 0
-	
-	def train_loop(self, learningRate):
+		self.t0 = 0
+		self.t1 = 0
+
+	def normalize(self, data):
+		min_value = min(data)
+		max_value = max(data)
+		return [(x - min_value) / (max_value - min_value) for x in data]
+
+
+	def train(self, learningRate = 0.00001, epoch = 10000):
+		self.nmile = self.normalize(self.mileages)
+		self.nprices = self.normalize(self.prices)
+		t0 = 0
+		t1 = 0
+
+		print(self.nmile, self.nprices)
+
+		for j in range(epoch):
+			der_t0 = 0
+			der_t1 = 0
+
+			for i in range(self.len):
+				der_t0 += ((t0 + t1 * self.nmile[i]) - self.nprices[i])
+				der_t1 += ((t0 + t1 * self.nmile[i]) - self.nprices[i]) * self.nmile[i]
+			
+			t0 = t0 - learningRate * (der_t0 * (2 / self.len))
+			t1 = t1 - learningRate * (der_t1 * (2 / self.len))
+
 		
-		price_pred = [x * self.m + self.c for x in self.mileages]
+		print(t0, t1)
 
-		D_m = (-2/self.len) * sum(self.mileages * np.subtract(self.prices, price_pred ))
-		D_c = (-2/self.len) * sum(np.subtract(self.prices, price_pred))
-
-
-		self.m = self.m - learningRate * D_m
-		self.c = self.c - learningRate * D_c
-
-
-
-
-	def train(self, learningRate = 0.001, epoch = 10):
-		for i in range(epoch):
-			self.train_loop(learningRate)
-
-		Y_pred = [x * self.m + self.c for x in self.mileages]
+		Y_pred = [x * t0 + t1 for x in self.mileages]
+		print(Y_pred)
 		plt.scatter(self.mileages, self.prices)
 		plt.plot([min(self.mileages), max(self.mileages)], [min(Y_pred), max(Y_pred)], color='red')
-		plt.show()
+		#plt.show()
 
 
 
