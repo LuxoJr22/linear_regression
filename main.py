@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-plt.rcParams['figure.figsize'] = (14.0, 9.0)
+plt.rcParams['figure.figsize'] = (12.0, 8.0)
 
 
 class model_trainer:
@@ -35,7 +35,7 @@ class model_trainer:
 		return [(x - min_value) / (max_value - min_value) for x in data]
 
 
-	def train(self, learningRate = 0.00001, epoch = 10000):
+	def train(self, learningRate = 0.1, epoch = 100):
 		self.nmile = self.normalize(self.mileages)
 		self.nprices = self.normalize(self.prices)
 		t0 = 0
@@ -51,6 +51,13 @@ class model_trainer:
 				der_t0 += ((t0 + t1 * self.nmile[i]) - self.nprices[i])
 				der_t1 += ((t0 + t1 * self.nmile[i]) - self.nprices[i]) * self.nmile[i]
 			
+			print(der_t0, der_t1)
+			
+			su = 0
+			for l in range(self.len):
+				su += ((t0 + t1* self.nmile[l]) - self.nprices[l]) ** 2
+			print(su)
+
 			t0 = t0 - learningRate * (der_t0 * (2 / self.len))
 			t1 = t1 - learningRate * (der_t1 * (2 / self.len))
 
@@ -61,7 +68,7 @@ class model_trainer:
 		print(Y_pred)
 		plt.scatter(self.mileages, self.prices)
 		plt.plot([min(self.mileages), max(self.mileages)], [min(Y_pred), max(Y_pred)], color='red')
-		#plt.show()
+		plt.show()
 
 
 
