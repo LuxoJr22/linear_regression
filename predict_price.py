@@ -33,11 +33,6 @@ def main():
 			continue
 		print(f"A car with {int(nb)}km should cost: {int(theta0 * nb + theta1)}€")
 
-	plt.scatter(mileages, prices)
-	price_pred = theta0  * mileages + theta1
-	plt.plot(mileages, price_pred, color='red')
-	plt.show()
-
 	return
 
 if __name__ == "__main__":
